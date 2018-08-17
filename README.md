@@ -4,7 +4,7 @@
 
 **Current support only for Postgres database; other databases are under development.**
 
-Atlas-db-controller is used to create custom resource and manage them.
+Atlas-db-controller is used to create custom resources and manage them.
 
 It manages 3 types of resources:
   - Database Servers
@@ -14,32 +14,32 @@ It manages 3 types of resources:
 The `DatabaseServer` resource will instantiate a database server and create a `Secret`
 that contains the DSN to connect to the database instance as the super user.
 
-This secret is then used by the `Database` resource, which will create specific
+This secret is then used by the `Database` resource, which will create a specific
 application database on that server, along with users and associated `Secrets` as defined
 in the spec. **At least one user with administrative access to the database is required.**
 
-`DatabaseSchema` resource will use the administrative `Secret` created by the `Database`
+The `DatabaseSchema` resource will use the administrative `Secret` created by the `Database`
 resource to install and maintain a specific version of the database schema.
 
-## Prerequisite
+## Prerequisites
    - Kubernetes cluster version should be > 1.9
    - Migration/Initialization scripts should comply with [these](https://github.com/golang-migrate/migrate/blob/master/MIGRATIONS.md) guidelines.
-   - To access gitHub source need user's **personal access tokens**
-   - `GitHub` and `AWS S3` are the only supported source for migration scripts.
+   - A GitHub personal read-only access token, which is used to fetch migrations from source control
+   - `GitHub` and `AWS S3` are the only supported sources for migration scripts.
    - Current end to end support for Postgres database only.
 
 ## Custom Resources and Controller deployment
-Users need to create custom resources and controller instance to manage custom resources in
+Users need to create custom resources and a controller instance to manage custom resources in
 kubernetes cluster.
 
 ##### Custom Resource
-To read about Custom resource follow [link](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/).
+To read about Custom resources follow [link](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/).
 
 To create the custom resources execute:
 ```
 kubectl create -f ./deploy/crd.yaml
 ```
-This will define `DatabaseServers`, `Database` and `DatabaseSchema` custom resource in
+This will define `DatabaseServers`, `Database` and `DatabaseSchema` custom resources in
 kubernetes cluster.
 
 ##### Controller
@@ -53,7 +53,7 @@ kubectl create -f ./deploy/atlas-db.yaml
 atlas-db.yaml files respectively.*
 
 Alternatively several developer options can be configured in `atlas-db.yaml` to customize
-the controller deployment as follow:
+the controller deployment as follows:
 
   - resync: Resync duration
   - logtostderr: Logs are written to standard error instead of files.
@@ -71,7 +71,7 @@ args:
   - "-l=monitor=atlas-deployment-1"
 ```
 
-For LabelSelector option to work as intended, resources should have proper labelling.
+For LabelSelector option to work as intended, resources should have proper labeling.
 ```
 <!--
 dbserverA.yaml
@@ -90,11 +90,11 @@ metadata:
 
 ## atlas-db resources and deployments
 
-Following section describes the custom resources created and managed by atlas-db-controller.
+The following section describes the custom resources created and managed by atlas-db-controller.
 
 ### Database Servers
 
-Database Server resource is used manage the lifecycle of a database server instance. *RDS DB servers are planned to provision manually.*
+The Database Server resource is used to manage the lifecycle of a database server instance. *RDS DB servers are planned to be provisioned manually.*
 
 #### Pod-Based Servers
 
@@ -110,7 +110,7 @@ These will result in the creation of 3 resources:
 
 ##### PostgreSQL
 
-To create a Postgres database server instance, user specify the Postgres member of the
+To create a Postgres database server instance, users specify the Postgres member of the
 DatabaseServer resource.
 
 ```
@@ -129,7 +129,7 @@ spec:
 
 ##### MySQL
 
-To create a MySQL database server instance, user specify the MySQL member of the
+To create a MySQL database server instance, users specify the MySQL member of the
 DatabaseServer resource.
 
 ```
@@ -148,13 +148,13 @@ spec:
 **NOTE: RDS database server needs to be provisioned manually and user should get login credentials.**
 
 
-When using External Database server or RDS database instance user need to create a
+When using External Database server or RDS database instance, the user needs to create a
 database server resource in Kubernetes cluster which will create an external service
 referring to External Database server or RDS database instance.
 
 These will result in the creation of 2 resources:
 
-- A Externalname `Service` with the same name as the `DatabaseServer` resource.
+- An Externalname `Service` with the same name as the `DatabaseServer` resource.
 - A `Secret` with the DSN to connect as super-user to the database.
 
 ```
@@ -176,7 +176,7 @@ spec:
 
 Database resources are used to manage the lifecycle of specific databases on a database
 server instance.
-This resource will create specified user in the database instance as well. *An user with
+This resource will create specified user in the database instance as well. *A user with
 admin role is a must*.
 
 This resource will also create a `Secret` with the DSN to connect as admin-user to the
@@ -203,7 +203,7 @@ spec:
 
 ### Database Schemas
 
-Database Schema resource is used to manage the lifecycle of the schemas within a database.
+The Database Schema resource is used to manage the lifecycle of the schemas within a database.
 This allows automated migration of database objects such as tables and triggers; and
 manages the execution versioning of those migrations.
 
@@ -230,14 +230,14 @@ User can use `sourceFrom` as an alternate to `source` to secure the credentials.
 
 | URL Query  | Description |
 |------------|-------------|
-| user | The username of the user connecting to github |
+| user | The username of the user connecting to GitHub |
 | personal-access-token  | An access token from Github [link](https://github.com/settings/tokens) |
 | owner | The repo owner |
 | repo | The name of the git repository |
 | path | Path in the git repository to migrations |
 | ref | **(optional)** can be a SHA, branch, or tag |
 
-### construct of S3 Url as a Source
+### Construct of S3 Url as a Source
 
 `s3://<bucket-name>/<prefix>`
 
@@ -247,7 +247,7 @@ User can use `sourceFrom` as an alternate to `source` to secure the credentials.
 | prefix | **(optional)** Limits the response to keys that begin with the specified prefix. |
 
 
-### Steps to create kubernetes secrets to secure (passwords, dsn, sourceURL)
+### Steps to create Kubernetes secrets to secure (passwords, dsn, sourceURL)
 
 Assume 'infoblox@123' is the password for admin user.
 
@@ -258,7 +258,7 @@ $ echo -n "infoblox@123" | tr -d '\n' | base64
 aW5mb2Jsb3hAMTIz
 ```
 
-User have to update this base64 encoded value below
+Users have to update this base64 encoded value below
 ```
 ...
 apiVersion: v1
@@ -283,3 +283,4 @@ default namespace.
 ```
 kubectl create secret -n default generic mydbsecrets --from-file=/tmp/dsn
 ```
+
